@@ -378,6 +378,8 @@ cli.js        Command-line interface
 - Replay/provenance evidence
 - Data-driven security-framework mappings
 
-## License
+## Source rights
 
-MIT
+Copyright (c) 2026 Glenn Murray. All rights reserved.
+
+This repository is public for portfolio and evaluation purposes. No permission is granted to copy, modify, redistribute, sublicense, commercialize, or create derivative works from the original source or architecture. See [NOTICE.md](NOTICE.md).
