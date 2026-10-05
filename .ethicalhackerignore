@@ -1,0 +1,8 @@
+# Generated reports
+TEST_REPORT*.json
+stress-results.json
+
+# Local output
+tmp/
+temp/
+artifacts/
