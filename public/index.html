@@ -1,1 +1,906 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ethical Hacker v1</title><style>body{font-family:system-ui;margin:0;background:#0b1020;color:#e8eefc}.wrap{max-width:1000px;margin:auto;padding:32px}.card{background:#131a2f;border:1px solid #27304a;border-radius:14px;padding:18px;margin:14px 0}h1{margin:0 0 8px}.muted{color:#9fb0d0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.metric{font-size:28px;font-weight:700}.pill{display:inline-block;padding:4px 10px;border-radius:99px;background:#243152}pre{white-space:pre-wrap}</style></head><body><div class="wrap"><h1>Ethical Hacker v1</h1><p class="muted">Continuous integrity, attack-path, and build-gate dashboard.</p><div class="grid"><div class="card"><div class="muted">Risk state</div><div id="status" class="metric">—</div></div><div class="card"><div class="muted">Findings</div><div id="findings" class="metric">—</div></div><div class="card"><div class="muted">Graph nodes</div><div id="nodes" class="metric">—</div></div><div class="card"><div class="muted">Graph edges</div><div id="edges" class="metric">—</div></div></div><div class="card"><h3>Build gate</h3><pre id="gate">Loading…</pre></div></div><script>async function go(){const s=await fetch('/api/status').then(r=>r.json());status.textContent=s.risk.status;findings.textContent=s.risk.findings;nodes.textContent=s.graph.nodes.length;edges.textContent=s.graph.edges.length;const g=await fetch('/api/gate').then(r=>r.json());gate.textContent=JSON.stringify(g,null,2)}go()</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Ethical Hacker</title>
+
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#070b14;
+  --panel:#0d1422;
+  --border:#26334a;
+  --text:#edf4ff;
+  --muted:#8fa4c4;
+  --pass:#55d68b;
+  --warn:#f1c75b;
+  --fail:#ff6b76;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top right,#12213d 0,transparent 35%),
+    var(--bg);
+  color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+button,input{font:inherit}
+
+.wrap{
+  max-width:1440px;
+  margin:auto;
+  padding:28px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+  margin-bottom:24px;
+}
+
+.title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+h1{
+  font-size:30px;
+  margin:0;
+}
+
+h3{margin-top:0}
+
+.version{
+  border:1px solid var(--border);
+  background:#101b2e;
+  color:#b9cae7;
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:12px;
+}
+
+.muted{color:var(--muted)}
+
+.scanbar{
+  display:grid;
+  grid-template-columns:minmax(280px,1fr) auto;
+  gap:10px;
+  padding:16px;
+  border:1px solid var(--border);
+  background:rgba(13,20,34,.92);
+  border-radius:14px;
+  margin-bottom:18px;
+}
+
+.path{
+  width:100%;
+  border:1px solid #31415d;
+  background:#080e19;
+  color:var(--text);
+  padding:12px 14px;
+  border-radius:9px;
+  outline:none;
+}
+
+.path:focus{border-color:#6289bd}
+
+.btn{
+  border:1px solid #466a98;
+  background:#17345a;
+  color:white;
+  border-radius:9px;
+  padding:10px 18px;
+  cursor:pointer;
+  font-weight:650;
+}
+
+.btn:disabled{
+  opacity:.55;
+  cursor:wait;
+}
+
+.options{
+  grid-column:1/-1;
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(150px,1fr));
+  gap:12px;
+}
+
+.card{
+  border:1px solid var(--border);
+  background:rgba(13,20,34,.94);
+  border-radius:14px;
+  padding:17px;
+}
+
+.metric{
+  font-size:30px;
+  font-weight:750;
+  margin-top:6px;
+}
+
+.gate{
+  font-size:27px;
+  font-weight:800;
+}
+
+.status-pass{color:var(--pass)}
+.status-warn{color:var(--warn)}
+.status-fail{color:var(--fail)}
+.status-not-scanned{color:var(--muted)}
+
+.layout{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:minmax(0,1.7fr) minmax(320px,.8fr);
+  gap:14px;
+}
+
+.stack{
+  display:grid;
+  gap:14px;
+}
+
+.severity{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+}
+
+.sev{
+  border:1px solid var(--border);
+  padding:12px;
+  border-radius:10px;
+  background:#0a111e;
+}
+
+.sev-value{
+  font-size:22px;
+  font-weight:750;
+}
+
+.findings{overflow:auto}
+
+table{
+  border-collapse:collapse;
+  width:100%;
+  min-width:720px;
+}
+
+th,td{
+  padding:11px 10px;
+  text-align:left;
+  border-bottom:1px solid #202c40;
+  font-size:13px;
+  vertical-align:top;
+}
+
+th{
+  color:#a7bad8;
+  font-size:12px;
+  text-transform:uppercase;
+}
+
+.badge{
+  display:inline-flex;
+  border-radius:999px;
+  padding:3px 8px;
+  border:1px solid var(--border);
+  font-size:11px;
+  font-weight:700;
+}
+
+.badge-critical,
+.badge-high{color:#ff8a92}
+
+.badge-medium{color:#f1c75b}
+.badge-low{color:#7ec7ff}
+.badge-info{color:#9fb0c9}
+
+.reason{
+  border-left:3px solid var(--warn);
+  background:#111827;
+  padding:10px 12px;
+  margin:8px 0;
+  border-radius:6px;
+}
+
+.chain{
+  background:#090f1b;
+  border:1px solid #24324a;
+  border-radius:8px;
+  padding:12px;
+  margin:9px 0;
+  overflow:auto;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12px;
+}
+
+.meta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.meta div{
+  background:#09111e;
+  border:1px solid #202d42;
+  border-radius:8px;
+  padding:10px;
+}
+
+.error{
+  display:none;
+  background:#34171c;
+  color:#ffc4c8;
+  border:1px solid #72323a;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:14px;
+}
+
+.empty{
+  color:var(--muted);
+  padding:28px 4px;
+  text-align:center;
+}
+
+@media(max-width:1000px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .layout{grid-template-columns:1fr}
+}
+
+@media(max-width:650px){
+  .wrap{padding:16px}
+  .topbar{flex-direction:column}
+  .scanbar{grid-template-columns:1fr}
+  .options{grid-column:auto}
+  .grid,.severity{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <div class="title">
+        <h1>Ethical Hacker</h1>
+        <span id="version" class="version">v1.4</span>
+      </div>
+
+      <div class="muted">
+        Architecture-aware security scanning, attack paths and build gating.
+      </div>
+    </div>
+
+    <div>
+      <span id="scanState" class="badge">NOT SCANNED</span>
+    </div>
+  </div>
+
+  <div id="error" class="error"></div>
+
+  <div class="scanbar">
+
+    <input
+      id="projectPath"
+      class="path"
+      value="."
+      placeholder="Project path — e.g. C:/Users/marin/Downloads/fluxo"
+    >
+
+    <button
+      id="scanButton"
+      class="btn"
+      onclick="scanProject()"
+    >
+      Scan project
+    </button>
+
+    <div class="options">
+
+      <label>
+        <input id="includeTests" type="checkbox">
+        Include tests
+      </label>
+
+      <label>
+        <input id="includeFixtures" type="checkbox">
+        Include fixtures
+      </label>
+
+      <label>
+        <input id="scanAll" type="checkbox">
+        Full scan
+      </label>
+
+    </div>
+
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="muted">Build gate</div>
+      <div id="gateStatus" class="gate status-not-scanned">
+        NOT SCANNED
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="muted">Findings</div>
+      <div id="findingCount" class="metric">0</div>
+    </div>
+
+    <div class="card">
+      <div class="muted">Graph nodes</div>
+      <div id="nodeCount" class="metric">0</div>
+    </div>
+
+    <div class="card">
+      <div class="muted">Graph edges</div>
+      <div id="edgeCount" class="metric">0</div>
+    </div>
+
+    <div class="card">
+      <div class="muted">Files scanned</div>
+      <div id="fileCount" class="metric">0</div>
+    </div>
+
+  </div>
+
+  <div class="layout">
+
+    <div class="stack">
+
+      <div class="card">
+
+        <h3>Severity</h3>
+
+        <div class="severity">
+
+          <div class="sev">
+            <div class="muted">Critical</div>
+            <div id="sevCritical" class="sev-value">0</div>
+          </div>
+
+          <div class="sev">
+            <div class="muted">High</div>
+            <div id="sevHigh" class="sev-value">0</div>
+          </div>
+
+          <div class="sev">
+            <div class="muted">Medium</div>
+            <div id="sevMedium" class="sev-value">0</div>
+          </div>
+
+          <div class="sev">
+            <div class="muted">Low</div>
+            <div id="sevLow" class="sev-value">0</div>
+          </div>
+
+          <div class="sev">
+            <div class="muted">Info</div>
+            <div id="sevInfo" class="sev-value">0</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="card findings">
+
+        <h3>Findings</h3>
+
+        <div id="findingsEmpty" class="empty">
+          Run a project scan to populate security findings.
+        </div>
+
+        <table id="findingsTable" hidden>
+
+          <thead>
+            <tr>
+              <th>Severity</th>
+              <th>Confidence</th>
+              <th>Domain</th>
+              <th>Finding</th>
+              <th>Path</th>
+            </tr>
+          </thead>
+
+          <tbody id="findingsBody"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <div class="stack">
+
+      <div class="card">
+        <h3>Gate reasons</h3>
+
+        <div id="gateReasons" class="empty">
+          No scan yet.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Attack paths</h3>
+
+        <div id="attackChains" class="empty">
+          No graph available.
+        </div>
+      </div>
+
+      <div class="card">
+
+        <h3>Project</h3>
+
+        <div class="meta">
+
+          <div>
+            <div class="muted">Framework</div>
+            <strong id="framework">—</strong>
+          </div>
+
+          <div>
+            <div class="muted">Supabase</div>
+            <strong id="supabase">—</strong>
+          </div>
+
+          <div>
+            <div class="muted">AI runtime</div>
+            <strong id="ai">—</strong>
+          </div>
+
+          <div>
+            <div class="muted">MCP</div>
+            <strong id="mcp">—</strong>
+          </div>
+
+        </div>
+
+        <p class="muted" id="scanMeta">
+          No project scanned.
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const $=id=>document.getElementById(id);
+
+function setText(id,value){
+  $(id).textContent=value ?? '—';
+}
+
+function escapeHtml(value){
+  return String(value??'')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+
+function showError(message){
+
+  const el=$('error');
+
+  if(!message){
+    el.style.display='none';
+    el.textContent='';
+    return;
+  }
+
+  el.textContent=message;
+  el.style.display='block';
+
+}
+
+function statusClass(status){
+
+  if(status==='PASS')return 'status-pass';
+  if(status==='WARN')return 'status-warn';
+  if(status==='FAIL')return 'status-fail';
+
+  return 'status-not-scanned';
+
+}
+
+function renderGate(gate){
+
+  const status=gate?.status||'NOT_SCANNED';
+
+  const el=$('gateStatus');
+
+  el.textContent=status;
+  el.className=`gate ${statusClass(status)}`;
+
+  const state=$('scanState');
+
+  state.textContent=status;
+  state.className=`badge ${statusClass(status)}`;
+
+  const reasons=[
+    ...(gate?.failReasons||[]),
+    ...(gate?.warnReasons||[])
+  ];
+
+  if(!reasons.length){
+
+    $('gateReasons').innerHTML=
+      status==='PASS'
+        ?'<div class="status-pass">No blocking or warning conditions.</div>'
+        :'<div class="empty">No gate reasons available.</div>';
+
+  }else{
+
+    $('gateReasons').innerHTML=
+      reasons
+        .map(
+          r=>`<div class="reason">${escapeHtml(r)}</div>`
+        )
+        .join('');
+
+  }
+
+  const chains=gate?.attackChains||[];
+
+  if(!chains.length){
+
+    $('attackChains').innerHTML=
+      '<div class="empty">No attack paths detected.</div>';
+
+  }else{
+
+    $('attackChains').innerHTML=
+      chains
+        .map(
+          c=>`
+            <div class="chain">
+              ${escapeHtml(c.path.join(' → '))}
+              <br>
+              risk: ${escapeHtml(c.risk)}
+            </div>
+          `
+        )
+        .join('');
+
+  }
+
+}
+
+function renderFindings(findings){
+
+  setText(
+    'findingCount',
+    findings.length
+  );
+
+  const body=$('findingsBody');
+  const table=$('findingsTable');
+  const empty=$('findingsEmpty');
+
+  body.innerHTML='';
+
+  if(!findings.length){
+
+    table.hidden=true;
+    empty.style.display='block';
+
+    empty.textContent=
+      'No security findings in the current scan scope.';
+
+    return;
+
+  }
+
+  empty.style.display='none';
+  table.hidden=false;
+
+  for(const f of findings){
+
+    const severity=
+      String(
+        f.severity||'INFO'
+      ).toUpperCase();
+
+    const tr=
+      document.createElement('tr');
+
+    tr.innerHTML=`
+      <td>
+        <span class="badge badge-${severity.toLowerCase()}">
+          ${escapeHtml(severity)}
+        </span>
+      </td>
+
+      <td>
+        ${escapeHtml(f.confidence||'—')}
+      </td>
+
+      <td>
+        ${escapeHtml(f.domain||'—')}
+      </td>
+
+      <td>
+        ${escapeHtml(f.title||'—')}
+      </td>
+
+      <td>
+        <code>
+          ${escapeHtml(f.path||'—')}
+        </code>
+      </td>
+    `;
+
+    body.appendChild(tr);
+
+  }
+
+}
+
+function render(data){
+
+  setText(
+    'version',
+    `v${data.version||'1.4'}`
+  );
+
+  const graph=
+    data.graph||{
+      nodes:[],
+      edges:[]
+    };
+
+  setText(
+    'nodeCount',
+    graph.nodes?.length||0
+  );
+
+  setText(
+    'edgeCount',
+    graph.edges?.length||0
+  );
+
+  setText(
+    'fileCount',
+    data.scope?.filesScanned||0
+  );
+
+  setText(
+    'sevCritical',
+    data.severity?.CRITICAL||0
+  );
+
+  setText(
+    'sevHigh',
+    data.severity?.HIGH||0
+  );
+
+  setText(
+    'sevMedium',
+    data.severity?.MEDIUM||0
+  );
+
+  setText(
+    'sevLow',
+    data.severity?.LOW||0
+  );
+
+  setText(
+    'sevInfo',
+    data.severity?.INFO||0
+  );
+
+  setText(
+    'framework',
+    data.detected?.framework||
+    'None detected'
+  );
+
+  setText(
+    'supabase',
+    data.detected?.supabase
+      ?'Detected'
+      :'No'
+  );
+
+  setText(
+    'ai',
+    data.detected?.ai
+      ?'Detected'
+      :'No'
+  );
+
+  setText(
+    'mcp',
+    data.detected?.mcp
+      ?'Detected'
+      :'No'
+  );
+
+  if(data.scanned){
+
+    const when=
+      data.scannedAt
+        ?new Date(
+            data.scannedAt
+          ).toLocaleString()
+        :'unknown time';
+
+    $('scanMeta').textContent=
+      `${data.projectPath} • scanned ${when}`;
+
+  }else{
+
+    $('scanMeta').textContent=
+      'No project scanned.';
+
+  }
+
+  renderFindings(
+    data.findings||[]
+  );
+
+  renderGate(
+    data.gate
+  );
+
+}
+
+async function refresh(){
+
+  showError('');
+
+  try{
+
+    const response=
+      await fetch(
+        '/api/status',
+        {
+          cache:'no-store'
+        }
+      );
+
+    if(!response.ok){
+
+      throw new Error(
+        `Status request failed: ${response.status}`
+      );
+
+    }
+
+    render(
+      await response.json()
+    );
+
+  }catch(err){
+
+    showError(
+      err.message
+    );
+
+  }
+
+}
+
+async function scanProject(){
+
+  showError('');
+
+  const button=
+    $('scanButton');
+
+  button.disabled=true;
+  button.textContent='Scanning…';
+
+  try{
+
+    const payload={
+
+      path:
+        $('projectPath')
+          .value
+          .trim()||
+        '.',
+
+      includeTests:
+        $('includeTests')
+          .checked,
+
+      includeFixtures:
+        $('includeFixtures')
+          .checked,
+
+      all:
+        $('scanAll')
+          .checked
+
+    };
+
+    const response=
+      await fetch(
+        '/api/scan-project',
+        {
+          method:'POST',
+
+          headers:{
+            'content-type':
+              'application/json'
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            )
+        }
+      );
+
+    const result=
+      await response.json();
+
+    if(!response.ok){
+
+      throw new Error(
+        result.error||
+        `Scan failed: ${response.status}`
+      );
+
+    }
+
+    render(
+      result.status
+    );
+
+  }catch(err){
+
+    showError(
+      err.message
+    );
+
+  }finally{
+
+    button.disabled=false;
+    button.textContent=
+      'Scan project';
+
+  }
+
+}
+
+refresh();
+
+</script>
+
+</body>
+</html>
