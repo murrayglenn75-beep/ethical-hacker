@@ -1,6 +1,25 @@
 # Ethical Hacker v1.4.0
 
-Architecture-aware defensive security analysis for modern software and AI systems.
+> **Architecture-aware defensive security analysis for modern software and AI systems.**
+
+Ethical Hacker turns a codebase into a security graph, traces risky architecture paths, classifies findings by confidence, emits SARIF, and produces a confidence-aware `PASS / WARN / FAIL` build gate.
+
+## At a glance
+
+```text
+Discover → Model → Attack → Observe → Prove → Gate
+```
+
+- Local-first scanning of real project files
+- Architecture and attack-path graph analysis
+- AI runtime, MCP/tool and Supabase-aware detection
+- Confidence-aware findings to reduce false-positive blocking
+- Differential security regression analysis
+- SARIF output for code-scanning workflows
+- Stateful browser dashboard
+- **41/41 automated regression tests**
+
+The scanner is passive and intended for systems you own or are explicitly authorized to assess. It does not perform live exploitation against third-party targets.
 
 Ethical Hacker scans a local codebase, models security-relevant architecture as a graph, identifies risky paths and contextual findings, and applies confidence-aware `PASS / WARN / FAIL` build gating. It is designed for authorized defensive validation and local-first analysis.
 
