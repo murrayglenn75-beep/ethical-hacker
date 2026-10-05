@@ -13,5 +13,5 @@
     "gate": "node cli.js gate",
     "test:v13": "node tests/v13.js"
   },
-  "license": "MIT"
+  "license": "UNLICENSED"
 }
