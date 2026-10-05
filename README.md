@@ -23,6 +23,27 @@ The scanner is passive and intended for systems you own or are explicitly author
 
 Ethical Hacker scans a local codebase, models security-relevant architecture as a graph, identifies risky paths and contextual findings, and applies confidence-aware `PASS / WARN / FAIL` build gating. It is designed for authorized defensive validation and local-first analysis.
 
+## Architecture
+
+```mermaid
+flowchart LR
+    C[Local codebase] --> D[Discover]
+    D --> G[Security Graph]
+    G --> A[Attack-path analysis]
+    G --> F[Contextual findings]
+    T[GenAI / tool telemetry] --> G
+    A --> P[Evidence & provenance]
+    F --> P
+    P --> B{Build gate}
+    B -->|safe| PASS[PASS]
+    B -->|review| WARN[WARN]
+    B -->|blocking risk| FAIL[FAIL]
+    P --> S[SARIF / security output]
+    P --> UI[Local dashboard]
+```
+
+The architecture is deliberately **passive and local-first**: it analyzes operator-supplied code and evidence rather than probing arbitrary third-party systems.
+
 ## Why this project exists
 
 Traditional scanners often report isolated findings without explaining how components connect. Ethical Hacker adds an architecture layer: it models services, APIs, AI runtimes, MCP/tool surfaces and sensitive capabilities as a security graph, then evaluates attack paths and build risk from that context.
