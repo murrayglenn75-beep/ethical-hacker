@@ -1,0 +1,17 @@
+{
+  "name": "ethical-hacker-v1",
+  "version": "1.3.1",
+  "description": "Authorized defensive integrity and adversarial validation core",
+  "main": "core/engine.js",
+  "scripts": {
+    "test": "node tests/run.js && node tests/advanced.js && node tests/connectors.js && node tests/v13.js",
+    "stress": "node tests/stress.js",
+    "demo": "node core/demo.js",
+    "serve": "node api/server.js",
+    "scan": "node cli.js scan",
+    "campaign": "node cli.js campaign",
+    "gate": "node cli.js gate",
+    "test:v13": "node tests/v13.js"
+  },
+  "license": "MIT"
+}

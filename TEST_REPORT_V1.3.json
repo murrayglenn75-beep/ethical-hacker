@@ -1,0 +1,7 @@
+{
+  "version": "1.3.0",
+  "deterministic": {"core": "10/10", "advanced": "6/6", "connectors": "8/8", "v1_3": "6/6", "total": "30/30"},
+  "stress": {"simulations": 10000, "crashes": 0, "totalFindings": 22097, "critical": 12337},
+  "smoke": {"campaign": "PASS", "gate": "PASS (correctly BLOCKED risky fixture)", "api": "PASS", "syntax": "PASS"},
+  "newCapabilities": ["adaptive synthetic campaigns", "canary verification", "OpenTelemetry-style GenAI trace ingestion", "runtime edge derivation", "SARIF export", "differential security regression", "expanded CLI/API"]
+}

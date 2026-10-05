@@ -1,0 +1,7 @@
+{
+  "version":"1.2.0",
+  "deterministicTests":{"passed":24,"failed":0},
+  "projectConnectorFixture":{"nodes":12,"edges":13,"signals":1,"detected":{"nextjs":true,"supabase":true,"ai":true,"mcp":true}},
+  "apiSmoke":{"connectors":true,"standards":true,"scanProject":true},
+  "futureProofing":["plugin connector registry","versioned scan envelopes","schema compatibility checks","data-driven standards registry","evidence hashing","extension fields","passive replayable evidence"]
+}

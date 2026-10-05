@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0.0",
+  "frameworks": [
+    {"id":"owasp-agentic-2026","name":"OWASP Top 10 for Agentic Applications 2026","version":"2026","status":"active"},
+    {"id":"owasp-acs","name":"OWASP Agent Control Standard","version":"2026-09","status":"active"},
+    {"id":"nist-agent-identity","name":"NIST Agent Identity and Authorization Concept","version":"2026-02","status":"draft"},
+    {"id":"mitre-atlas","name":"MITRE ATLAS","version":"rolling","status":"active"}
+  ]
+}
