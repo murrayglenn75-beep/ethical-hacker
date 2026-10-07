@@ -1,5 +1,14 @@
 # Ethical Hacker v1.4.0
 
+## 30-second overview
+
+**Ethical Hacker is a local defensive security scanner that looks at how a project is connected, not just at isolated code warnings.** It builds a security graph, traces risky architecture paths, and turns the evidence into findings and a CI-friendly build gate.
+
+**What I built:** local project discovery, architecture graphing, attack-path analysis, AI/MCP/Supabase-aware detection, confidence-aware findings, SARIF output, regression comparison, a browser dashboard, and `PASS / WARN / FAIL` gating.
+
+**Why it matters:** traditional scanners can produce long lists of disconnected findings. This project tries to show which findings combine into meaningful attack paths and which risks should actually block a build.
+
+
 > **Architecture-aware defensive security analysis for modern software and AI systems.**
 
 Ethical Hacker turns a codebase into a security graph, traces risky architecture paths, classifies findings by confidence, emits SARIF, and produces a confidence-aware `PASS / WARN / FAIL` build gate.
