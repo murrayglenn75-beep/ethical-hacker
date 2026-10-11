@@ -1,5 +1,8 @@
 # Ethical Hacker v1.4.0
 
+> **Independent review:** [Reproduce the checks and inspect the trust boundaries](docs/REVIEWER_QUICKSTART.md). This guide separates documented evidence from production guarantees.
+
+
 ## 30-second overview
 
 **Ethical Hacker is a local defensive security scanner that looks at how a project is connected, not just at isolated code warnings.** It builds a security graph, traces risky architecture paths, and turns the evidence into findings and a CI-friendly build gate.
