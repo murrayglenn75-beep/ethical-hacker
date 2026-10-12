@@ -499,7 +499,7 @@ function scanProject(root,opts={}){
     // Python execution surfaces are context signals, not confirmed exploits.
     // Scope Python-specific detection to .py files to avoid documentation noise.
     if(ext==='.py' && !isDetectorDefinitionFile(r) &&
-       /\\b(?:eval|exec)\\s*\\(|\\bos\\.system\\s*\\(|\\bsubprocess\\.(?:Popen|run|call|check_call|check_output)\\s*\\(/.test(text)){
+       (/\b(?:eval|exec)\s*\(/.test(text) || /\bos\.system\s*\(/.test(text) || /\bsubprocess\.(?:Popen|run|call|check_call|check_output)\s*\(/.test(text))){
       signals.push({
         domain:'runtime-integrity',
         severity:'HIGH',
