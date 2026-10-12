@@ -17,7 +17,7 @@ const TEST_DIRS=new Set([
 const TEXT_EXT=new Set([
   '.js','.jsx','.ts','.tsx','.mjs','.cjs',
   '.json','.sql','.toml','.yaml','.yml',
-  '.md','.env','.txt'
+  '.md','.env','.txt','.py'
 ]);
 
 function sha256(s){
@@ -491,6 +491,20 @@ function scanProject(root,opts={}){
         severity:'HIGH',
         confidence:'PROBABLE',
         title:'Dynamic or shell execution surface',
+        path:r,
+        evidence:ev
+      });
+    }
+
+    // Python execution surfaces are context signals, not confirmed exploits.
+    // Scope Python-specific detection to .py files to avoid documentation noise.
+    if(ext==='.py' && !isDetectorDefinitionFile(r) &&
+       (/\b(?:eval|exec)\s*\(/.test(text) || /\bos\.system\s*\(/.test(text) || /\bsubprocess\.(?:Popen|run|call|check_call|check_output)\s*\(/.test(text))){
+      signals.push({
+        domain:'runtime-integrity',
+        severity:'HIGH',
+        confidence:'PROBABLE',
+        title:'Python dynamic or process execution surface',
         path:r,
         evidence:ev
       });
