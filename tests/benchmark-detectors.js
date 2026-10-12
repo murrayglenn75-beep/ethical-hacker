@@ -13,6 +13,8 @@ const CASES=[
   {id:'raw-html-rendering',file:'src/view.tsx',source:'export const View=({text}) => <div dangerouslySetInnerHTML={{__html:text}} />;\n',expected:['application-security|Raw HTML rendering surface'],negative:[]},
   {id:'empty-example-env',file:'.env.example',source:'SUPABASE_SERVICE_ROLE_KEY=\n',expected:[],negative:['secrets-security|Potential hard-coded Supabase service-role credential']},
   {id:'environment-reference',file:'src/server.ts',source:'const key=process.env.SUPABASE_SERVICE_ROLE_KEY;\n',expected:[],negative:['secrets-security|Potential hard-coded Supabase service-role credential']},
+  {id:'python-subprocess',file:'src/task.py',source:'import subprocess\\nsubprocess.run([\"echo\",\"safe\"], check=True)\\n',expected:['runtime-integrity|Python dynamic or process execution surface'],negative:[]},
+  {id:'python-ordinary',file:'src/task.py',source:'def health():\\n    return True\\n',expected:[],negative:['runtime-integrity|Python dynamic or process execution surface']},
   {id:'ordinary-source',file:'src/health.ts',source:'export const health = () => ({ok:true});\n',expected:[],negative:['runtime-integrity|Dynamic or shell execution surface','secrets-security|Potential hard-coded Supabase service-role credential']}
 ];
 
