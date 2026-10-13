@@ -15,5 +15,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm test
       - run: npm run test:artifact
       - run: node cli.js inspect-artifact . experimental/owned-artifact-inspector.js --i-own-this
