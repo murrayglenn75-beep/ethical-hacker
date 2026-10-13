@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs=require('fs');
+const {inspectOwnedArtifact}=require('./experimental/owned-artifact-inspector');
 const path=require('path');
 
 const {ingestProject}=require('./core/ingest-project');
@@ -50,7 +51,10 @@ function parseProjectArgs(args){
 const [cmd,...args]=process.argv.slice(2);
 
 try{
-  if(cmd==='scan'){
+  if(cmd==='inspect-artifact'){
+    if(args.length!==2)throw Error('USAGE: inspect-artifact <owned-project-root> <relative-js-path>');
+    out(inspectOwnedArtifact({root:path.resolve(args[0]),relativePath:args[1],authorized:true}));
+  }else if(cmd==='scan'){
     const {root,scanOptions}=parseProjectArgs(args);
     const r=ingestProject(root,{scanOptions});
 
