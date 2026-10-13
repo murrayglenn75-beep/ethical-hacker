@@ -52,7 +52,7 @@ const [cmd,...args]=process.argv.slice(2);
 
 try{
   if(cmd==='inspect-artifact'){
-    if(args.length!==2)throw Error('USAGE: inspect-artifact <owned-project-root> <relative-js-path>');
+    if(args.length!==3 || args[2]!=='--i-own-this')throw Error('USAGE: inspect-artifact <owned-project-root> <relative-js-path> --i-own-this');
     out(inspectOwnedArtifact({root:path.resolve(args[0]),relativePath:args[1],authorized:true}));
   }else if(cmd==='scan'){
     const {root,scanOptions}=parseProjectArgs(args);
