@@ -16,3 +16,4 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m unittest discover -s tooling -p 'test_repair_triage.py' -v
+      - run: python -m unittest discover -s tooling -p 'test_ci_failure_collector.py' -v
