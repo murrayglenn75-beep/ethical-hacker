@@ -10,11 +10,11 @@ const RULES=[
 function inspectOwnedArtifact({root,relativePath,authorized=false}={}){
  if(authorized!==true)throw Error('EXPLICIT_AUTHORIZATION_REQUIRED');
  if(typeof root!=='string'||typeof relativePath!=='string'||!root||!relativePath)throw Error('INVALID_PATH');
- if(path.isAbsolute(relativePath)||relativePath.split(/[\\/]/).some(s=>!s||s==='.'||s==='..'))throw Error('PATH_OUTSIDE_ROOT');
+ if(path.isAbsolute(relativePath)||relativePath.replaceAll(String.fromCharCode(92),'/').split('/').some(s=>!s||s==='.'||s==='..'))throw Error('PATH_OUTSIDE_ROOT');
  const rootReal=fs.realpathSync(root);
  if(!fs.lstatSync(rootReal).isDirectory())throw Error('INVALID_ROOT');
  let cursor=rootReal;
- for(const segment of relativePath.split(/[\\/])){cursor=path.join(cursor,segment);if(fs.lstatSync(cursor).isSymbolicLink())throw Error('SYMLINK_REFUSED');}
+ for(const segment of relativePath.replaceAll(String.fromCharCode(92),'/').split('/')){cursor=path.join(cursor,segment);if(fs.lstatSync(cursor).isSymbolicLink())throw Error('SYMLINK_REFUSED');}
  const target=path.resolve(rootReal,relativePath);
  if(!target.startsWith(rootReal+path.sep))throw Error('PATH_OUTSIDE_ROOT');
  if(!EXT.has(path.extname(target).toLowerCase()))throw Error('UNSUPPORTED_FORMAT');
