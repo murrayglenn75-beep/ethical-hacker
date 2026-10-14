@@ -1,0 +1,20 @@
+name: Artifact inspector regression
+on:
+  pull_request:
+  push:
+    branches:
+      - feature/owned-js-artifact-inspector-20261013
+permissions:
+  contents: read
+jobs:
+  artifact-inspector:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+      - run: npm run test:artifact
+      - run: node cli.js inspect-artifact . experimental/owned-artifact-inspector.js --i-own-this
