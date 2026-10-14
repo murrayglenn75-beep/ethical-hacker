@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 
 from tooling.log_preview import reduce_log
 from tooling.query_log_selection import select
