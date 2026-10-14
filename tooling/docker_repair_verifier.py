@@ -16,6 +16,23 @@ def docker_args(worktree,image):
       "--mount",f"type=bind,src={worktree},dst=/workspace,readonly",
       "--workdir","/workspace","--env","PYTHONDONTWRITEBYTECODE=1",
       image,"python","-B","-m","unittest","discover","-s","tests","-v"]
+def check_safe_changed_paths(tree, changed):
+    """Reject metadata, symlinks and paths outside temporary workspace."""
+    root = Path(tree).resolve(strict=True)
+    for name in changed:
+        rel = Path(name)
+        if (rel.is_absolute() or not rel.parts or
+                any(part in ("", ".", "..", ".git") for part in rel.parts)):
+            raise ValueError("unsafe changed path")
+        current = root
+        for part in rel.parts:
+            current = current / part
+            if current.is_symlink():
+                raise ValueError("symlink in changed path")
+        if not current.resolve(strict=False).is_relative_to(root):
+            raise ValueError("changed path escapes workspace")
+
+
 def execute(repo,plan_path,patch_path,image,runner=subprocess.run):
     repo=Path(repo).resolve();patch=Path(patch_path).resolve()
     plan=json.loads(Path(plan_path).read_text(encoding="utf-8"))
@@ -46,6 +63,7 @@ def execute(repo,plan_path,patch_path,image,runner=subprocess.run):
             command(["git","apply","--",str(patch)],tree)
             changed=command(["git","diff","--name-only"],tree).stdout.splitlines()
             if not changed: raise ValueError("no modified files")
+            check_safe_changed_paths(tree, changed)
             # No host tests; only code mounted readonly in a restricted container.
             cmd=docker_args(tree,image)
             result=runner(cmd,capture_output=True,text=True,timeout=120,check=False)
