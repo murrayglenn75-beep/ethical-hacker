@@ -1,0 +1,12 @@
+name: Query-aware evidence selection
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m unittest discover -s tooling -p test_query_log_selection.py -v
