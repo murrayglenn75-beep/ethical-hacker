@@ -1,0 +1,22 @@
+name: Scanner evidence and release candidate
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scan-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+      - run: node benchmarks/test-benchmark.js
+      - run: node benchmarks/benchmark.js > scanner-benchmark.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scanner-benchmark
+          path: scanner-benchmark.json
+          retention-days: 14
