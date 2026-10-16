@@ -37,6 +37,9 @@ test('current gate starts not scanned',()=>{
 
   assert.equal(g.status,'NOT_SCANNED');
   assert.equal(g.blocking.total,0);
+  assert.equal(g.legacyStatus,'FAIL');
+  assert.equal(g.policy.passed,false);
+  assert.ok(g.policy.failures.some(f=>f.code==='NOT_SCANNED'));
 });
 
 async function request(port,method,url,body){
@@ -84,6 +87,12 @@ async function runHttpTests(){
     console.log(
       'PASS API status starts not scanned'
     );
+    passed++;
+
+    r=await request(port,'GET','/%2e%2e/%2e%2e/package.json');
+    assert.notEqual(r.status,200);
+    assert.ok([403,404].includes(r.status));
+    console.log('PASS static traversal denied');
     passed++;
 
     r=await request(
@@ -177,10 +186,10 @@ async function runHttpTests(){
 runHttpTests()
   .then(()=>{
     console.log(
-      `\n${passed}/6 dashboard/API tests passed`
+      `\n${passed}/7 dashboard/API tests passed`
     );
 
-    if(passed!==6){
+    if(passed!==7){
       process.exitCode=1;
     }
   })
