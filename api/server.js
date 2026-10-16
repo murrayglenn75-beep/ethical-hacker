@@ -86,7 +86,7 @@ function currentGate(){
   if(!latestScan||!latestProjectGraph){
     return {
       status:'NOT_SCANNED',
-      legacyStatus:'PASS',
+      legacyStatus:'FAIL',
       reasons:[],
       failReasons:[],
       warnReasons:[],
@@ -105,9 +105,9 @@ function currentGate(){
         total:0
       },
       policy:{
-        passed:true,
+        passed:false,
         results:[],
-        failures:[]
+        failures:[{code:'NOT_SCANNED',reason:'Run a scan before release gating'}]
       },
       attackChains:[],
       releaseDiff:null
@@ -331,10 +331,20 @@ const server=http.createServer((req,res)=>{
     });
   }
 
-  const file=req.url==='/'?'index.html':req.url.replace(/^\//,'');
-  const p=path.join(__dirname,'..','public',file);
+  const publicRoot=path.resolve(__dirname,'..','public');
+  let pathname;
+  try{
+    pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
+  }catch{
+    return json(res,400,{error:'invalid request path'});
+  }
+  const file=pathname==='/'?'index.html':pathname.replace(/^\//,'');
+  const p=path.resolve(publicRoot,file);
+  if(p!==publicRoot&&!p.startsWith(publicRoot+path.sep)){
+    return json(res,403,{error:'path outside public root'});
+  }
 
-  if(fs.existsSync(p)&&fs.statSync(p).isFile()){
+  if(fs.existsSync(p)&&fs.statSync(p).isFile()&&fs.realpathSync(p).startsWith(publicRoot+path.sep)){
     const contentType=
       file.endsWith('.html')?'text/html; charset=utf-8':
       file.endsWith('.js')?'text/javascript; charset=utf-8':
