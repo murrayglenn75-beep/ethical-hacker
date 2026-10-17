@@ -20,6 +20,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Murray Method evidence preflight regression
+        run: python -m unittest discover -s engineering -p 'test_*.py' -q
       - name: Run deterministic regression tests (including security fail-closed checks)
         run: npm test
       - name: Run stress suite
