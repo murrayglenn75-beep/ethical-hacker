@@ -1,5 +1,6 @@
 const assert=require('assert');
 const path=require('path');
+const http=require('http');
 
 const {
   server,
@@ -89,10 +90,22 @@ async function runHttpTests(){
     );
     passed++;
 
-    r=await request(port,'GET','/%2e%2e/%2e%2e/package.json');
-    assert.notEqual(r.status,200);
-    assert.ok([403,404].includes(r.status));
-    console.log('PASS static traversal denied');
+    // Raw HTTP request preserves the encoded traversal payload instead of
+    // letting fetch/URL normalization rewrite it before it reaches the server.
+    const traversalStatus=await new Promise((resolve,reject)=>{
+      const req=http.request({
+        host:'127.0.0.1',port,
+        method:'GET',
+        path:'/..%2fpackage.json'
+      },res=>{
+        res.resume();
+        res.on('end',()=>resolve(res.statusCode));
+      });
+      req.on('error',reject);
+      req.end();
+    });
+    assert.ok([400,403,404].includes(traversalStatus));
+    console.log('PASS raw HTTP encoded traversal denied');
     passed++;
 
     r=await request(
