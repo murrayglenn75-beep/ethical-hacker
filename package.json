@@ -4,7 +4,7 @@
   "description": "Authorized defensive integrity and adversarial validation core",
   "main": "core/engine.js",
   "scripts": {
-    "test": "node tests/run.js && node tests/advanced.js && node tests/connectors.js && node tests/v13.js && node tests/dashboard.js",
+    "test": "node tests/run.js && node tests/advanced.js && node tests/connectors.js && node tests/v13.js && node tests/dashboard.js && node tests/graph-evidence.js",
     "stress": "node tests/stress.js",
     "demo": "node core/demo.js",
     "serve": "node api/server.js",
