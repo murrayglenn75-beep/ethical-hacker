@@ -1,0 +1,35 @@
+name: experimental AST dependency graph
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  graph-experiment:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install parser in isolated temporary directory
+        run: |
+          npm install --prefix "$RUNNER_TEMP/graph-parser" --no-audit --no-fund --save-exact typescript@5.9.3
+      - name: AST regression fixture
+        run: NODE_PATH="$RUNNER_TEMP/graph-parser/node_modules" node tests/code-graph-ast.js
+      - name: Extract actual repository graph (read-only)
+        run: |
+          mkdir -p graph-evidence
+          NODE_PATH="$RUNNER_TEMP/graph-parser/node_modules" node core/code-graph-ast.js . > graph-evidence/graph.json
+          node -e "const g=require('./graph-evidence/graph.json'); console.log(JSON.stringify({nodes:g.nodes.length,edges:g.edges.length,unresolved:g.unresolved.length,parser:g.parser}))"
+      - name: Preserve experiment evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: experimental-ast-graph
+          path: graph-evidence/graph.json
+          if-no-files-found: ignore
+          retention-days: 7
