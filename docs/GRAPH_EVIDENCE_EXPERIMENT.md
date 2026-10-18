@@ -12,3 +12,9 @@ Run `npm test` to execute `tests/graph-evidence.js` alongside existing tests.
 Next gated experiment: independently parse source with an AST, verify edge locations against repository files at a pinned commit, compare graph queries against a hand-labelled truth set, measure precision/recall, CPU/RAM, build time and changes in debugging outcomes. No automatic hook installs, external graph exports or production merge gates without approval.
 
 Safety: avoid indexing secrets, credentials or private documents. Any future external Neo4j/MCP integration must pass AAK authorization.
+
+## Reproducible synthetic comparison
+
+Run `npm run benchmark:graph`. This deliberately small four-file example checks transitive graph reachability versus **single-file** text search, with four labelled yes/no queries. A local Node 22.16.0 run produced graph 4/4 and single-file 3/4. These are synthetic correctness checks, not project precision/recall, AST extraction, performance results or a fair comparison against recursive repository search. Graph edges are manually supplied; they have NOT been independently verified against the linked source files.
+
+The current GitHub CI outcome for this latest benchmark commit remains unverified. Before adoption, independently build a pinned-commit AST graph and evaluate on real labelled repository dependency questions. Keep measured speed, memory, accuracy and reviewer usefulness separate from fixture results.
