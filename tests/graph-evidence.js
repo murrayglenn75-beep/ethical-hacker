@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const {auditGraph}=require('../core/graph-evidence');
+const graph={nodes:[{id:'auth'},{id:'db'}],edges:[{from:'auth',to:'db',kind:'reads'}]};
+let r=auditGraph(graph);assert.equal(r.status,'AUDITED');assert.equal(r.unverified,1);assert.equal(r.extracted,0);
+r=auditGraph({nodes:graph.nodes,edges:[{from:'auth',to:'db',provenance:'EXTRACTED',source:'src/auth.js',line:12}]});
+assert.equal(r.extracted,1);assert.equal(r.unverified,0);
+r=auditGraph({nodes:graph.nodes,edges:[{from:'auth',to:'missing',provenance:'EXTRACTED',source:'x',line:1}]});
+assert.equal(r.status,'INVALID');assert.equal(r.edges,0);
+r=auditGraph({nodes:[{id:'x'},{id:'x'}],edges:[]});assert.equal(r.status,'INVALID');
+assert.throws(()=>auditGraph({nodes:[],edges:null}),TypeError);
+console.log('PASS graph evidence audit regressions');
