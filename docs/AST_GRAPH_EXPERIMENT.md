@@ -1,0 +1,6 @@
+# AST graph experiment (non-release gating)
+Run an isolated parser: `npm install --prefix ./tmp-parser --no-audit --no-fund --save-exact typescript@5.9.3` then `NODE_PATH=./tmp-parser/node_modules node tests/code-graph-ast.js` and `NODE_PATH=./tmp-parser/node_modules node core/code-graph-ast.js . > graph.json`.
+
+This opt-in tool reads JavaScript/TypeScript source and emits source-line-backed local relative import/export/literal-require/dynamic-import links. Edges labelled EXTRACTED indicate syntactic findings, not verified runtime dependencies or security authority. It skips symlinks and standard generated/dependency directories. Nonliteral imports, aliases, conditional loading, call graphs, unresolved imports and cross-language relationships are outside current coverage. Never export private code without explicit permission.
+
+The CI workflow runs on real repo files and uploads an inspectable graph. It does not yet measure accuracy against a manually labeled real-repository ground truth, CPU/RAM budget, or Graphify performance. The existing four-file synthetic graph-vs-single-file search benchmark is not a fair comparison with recursive search. Do not claim production benefit until equivalent real-repository queries, precision/recall, cost and failure modes have been evaluated.
